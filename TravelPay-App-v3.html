@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelPay — Pay anywhere, instantly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+[data-theme="light"]{
+  --bg:#F0F5FF;--bg2:#FFFFFF;--bg3:#E8EFFC;--card:#FFFFFF;
+  --border:rgba(37,99,235,0.12);--border2:rgba(37,99,235,0.22);
+  --text:#0F1C3F;--muted:#6B7FA8;
+  --nav-bg:#fff;--nav-shadow:0 -4px 20px rgba(37,99,235,0.06);
+  --modal-bg:#fff;--overlay:rgba(15,28,63,0.45);
+  --input-bg:#F0F5FF;
+}
+[data-theme="dark"]{
+  --bg:#080C14;--bg2:#0F1520;--bg3:#161E2E;--card:#0F1520;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#EEF2F8;--muted:#5A6A85;
+  --nav-bg:#0F1520;--nav-shadow:0 -4px 20px rgba(0,0,0,0.3);
+  --modal-bg:#0F1520;--overlay:rgba(0,0,0,0.65);
+  --input-bg:#161E2E;
+}
+:root{
+  --blue:#2563EB;--blue2:#1D4ED8;
+  --blue-bg:rgba(37,99,235,0.09);--blue-border:rgba(37,99,235,0.22);
+  --red:#DC2626;--red-bg:rgba(220,38,38,0.08);
+  --amber:#D97706;--amber-bg:rgba(217,119,6,0.08);
+  --green:#16A34A;--green-bg:rgba(22,163,74,0.08);
+  --font:'Cabinet Grotesk',sans-serif;--mono:'DM Mono',monospace;
+  --r:12px;--r2:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(37,99,235,0.06),transparent 70%);pointer-events:none;z-index:0}
+.app{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 0;gap:5px}
+.logo{display:flex;align-items:center;gap:6px}
+.logo-mark{width:25px;height:25px;border-radius:7px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:12px;height:12px}
+.logo-text{font-weight:900;font-size:15px;letter-spacing:-.3px}
+.logo-text span{color:var(--blue)}
+.header-right{display:flex;align-items:center;gap:5px}
+.net-badge{display:flex;align-items:center;gap:4px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;padding:4px 8px;font-size:10px;font-family:var(--mono);color:var(--muted)}
+.net-dot{width:5px;height:5px;border-radius:50%;background:#16A34A;animation:pulse 2s infinite}
+.net-dot.disconnected{background:var(--muted)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.theme-btn{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0}
+.theme-btn:hover{background:var(--blue-bg)}
+.connect-btn{background:var(--blue);color:#fff;border:none;border-radius:20px;padding:5px 11px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.connect-btn:hover{background:var(--blue2)}
+.connect-btn.connected{background:var(--green-bg);border:0.5px solid rgba(22,163,74,0.3);color:var(--green);font-family:var(--mono);font-size:10px}
+.connect-btn.loading{opacity:.7;cursor:wait}
+
+/* BALANCE */
+.balance-section{padding:22px 14px 16px;background:linear-gradient(135deg,#2563EB,#1D4ED8);border-radius:0 0 22px 22px;margin-bottom:4px;position:relative;overflow:hidden}
+.balance-section::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.05);border-radius:50%}
+.balance-section::after{content:'';position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;background:rgba(255,255,255,0.03);border-radius:50%}
+.balance-label{font-size:10px;color:rgba(255,255,255,0.6);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;position:relative;z-index:1}
+.balance-amount{font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:3px;color:#fff;position:relative;z-index:1}
+.balance-amount span{color:rgba(255,255,255,0.55);font-size:28px}
+.balance-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:14px;font-family:var(--mono);position:relative;z-index:1}
+.balance-row{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.balance-change{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.15);border:0.5px solid rgba(255,255,255,0.25);border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;color:#fff}
+.balance-usdc-badge{font-size:10px;color:rgba(255,255,255,0.6);font-family:var(--mono);background:rgba(255,255,255,0.1);padding:3px 8px;border-radius:20px}
+
+/* ACTIONS */
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:12px 14px 18px}
+.action{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .15s}
+.action:hover{transform:translateY(-2px)}
+.action-icon{width:46px;height:46px;border-radius:13px;background:var(--bg3);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.action:hover .action-icon{border-color:var(--blue-border);background:var(--blue-bg)}
+.action-icon svg{width:19px;height:19px}
+.action-label{font-size:10px;color:var(--muted);font-weight:600}
+
+/* FX STRIP */
+.fx-strip{margin:0 14px 18px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r2);padding:13px;overflow:hidden}
+.fx-title{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.fx-live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.fx-scroll{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}
+.fx-scroll::-webkit-scrollbar{display:none}
+.fx-chip{flex-shrink:0;background:var(--bg2);border:0.5px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;transition:all .15s}
+.fx-chip:hover,.fx-chip.active{border-color:var(--blue-border);background:var(--blue-bg)}
+.fx-flag{font-size:15px;margin-bottom:2px}
+.fx-code{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--blue);margin-bottom:1px}
+.fx-rate{font-size:10px;color:var(--muted)}
+.fx-converter{margin-top:11px;padding-top:11px;border-top:0.5px solid var(--border)}
+.fx-row{display:flex;gap:6px;align-items:center}
+.fx-input-wrap{flex:1;background:var(--bg2);border:0.5px solid var(--border);border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:5px}
+.fx-cur{font-size:10px;font-family:var(--mono);color:var(--muted);white-space:nowrap}
+.fx-input{background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:14px;font-weight:500;width:100%;min-width:0}
+.fx-eq{font-size:12px;color:var(--muted)}
+.fx-result{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--blue)}
+
+/* SECTIONS */
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:0 14px 9px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+.see-all{font-size:11px;color:var(--blue);cursor:pointer;font-weight:600}
+
+/* TXN */
+.txn-list{padding:0 14px;display:flex;flex-direction:column;gap:2px;margin-bottom:18px}
+.txn-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);cursor:pointer;transition:all .15s}
+.txn-item:hover{border-color:var(--border2);background:var(--bg3)}
+.txn-item.onchain{border-left:2px solid var(--green)}
+.txn-av{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px}
+.txn-chain-badge{font-size:9px;font-family:var(--mono);background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:4px;border:0.5px solid rgba(22,163,74,0.2)}
+.txn-note{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-right{text-align:right;flex-shrink:0}
+.txn-amount{font-family:var(--mono);font-size:12px;font-weight:600}
+.txn-amount.out{color:var(--red)}.txn-amount.inc{color:var(--green)}
+.txn-time{font-size:10px;color:var(--muted)}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-around;background:var(--nav-bg);border-top:0.5px solid var(--border);padding:9px 14px 16px;position:sticky;bottom:0;z-index:50;box-shadow:var(--nav-shadow);transition:background .25s}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 10px;border-radius:10px;transition:all .15s}
+.nav-item.active{background:var(--blue-bg)}
+.nav-icon svg{width:18px;height:18px;stroke:var(--muted);transition:stroke .15s}
+.nav-item.active .nav-icon svg{stroke:var(--blue)}
+.nav-label{font-size:9px;color:var(--muted);font-weight:600;transition:color .15s}
+.nav-item.active .nav-label{color:var(--blue)}
+
+/* PAGES */
+.page{display:none;flex:1;overflow-y:auto}.page.active{display:flex;flex-direction:column}
+
+/* GROUPS */
+.group-card{margin:0 14px 9px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r2);padding:15px;cursor:pointer;transition:all .15s}
+.group-card:hover{border-color:var(--blue-border)}
+.group-status{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px}
+.group-status.active{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
+.group-bar{height:3px;background:var(--border);border-radius:2px;margin-top:9px;overflow:hidden}
+.group-bar-fill{height:100%;background:var(--blue);border-radius:2px}
+.new-group-btn{margin:0 14px 18px;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;background:transparent;border:0.5px dashed var(--border2);border-radius:var(--r2);cursor:pointer;font-family:var(--font);font-size:12px;color:var(--muted);transition:all .15s}
+.new-group-btn:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
+
+/* QR */
+.qr-section{padding:18px 14px;display:flex;flex-direction:column;align-items:center}
+.qr-box{width:170px;height:170px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+.qr-corner{position:absolute;width:16px;height:16px;border-color:var(--blue);border-style:solid}
+.qr-corner.tl{top:9px;left:9px;border-width:2px 0 0 2px}
+.qr-corner.tr{top:9px;right:9px;border-width:2px 2px 0 0}
+.qr-corner.bl{bottom:9px;left:9px;border-width:0 0 2px 2px}
+.qr-corner.br{bottom:9px;right:9px;border-width:0 2px 2px 0}
+.qr-inner{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;padding:13px}
+.qr-cell{width:10px;height:10px;border-radius:1px}
+.addr-box{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:9px}
+.addr-text{font-family:var(--mono);font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;white-space:nowrap;flex-shrink:0}
+.req-amount-row{width:100%;display:flex;gap:6px;margin-bottom:12px}
+.req-input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none}
+.req-input:focus{border-color:var(--blue-border)}
+.share-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.share-btn:hover{background:var(--blue2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:100;display:flex;align-items:flex-end;backdrop-filter:blur(4px)}
+.modal-sheet{background:var(--modal-bg);border-radius:20px 20px 0 0;width:100%;max-width:420px;margin:0 auto;padding:16px;border-top:0.5px solid var(--border2);animation:slideUp .22s ease;transition:background .25s;max-height:90vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:32px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:16px;text-align:center}
+.field{margin-bottom:11px}
+.field-label{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:4px;display:block;letter-spacing:.5px;text-transform:uppercase}
+.field-input{width:100%;background:var(--input-bg);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.field-input:focus{border-color:var(--blue-border)}
+.amount-big{font-size:36px;font-weight:900;text-align:center;letter-spacing:-1px;border:none;border-bottom:2px solid var(--border);background:transparent;color:var(--text);outline:none;width:100%;padding:8px 0;margin-bottom:4px;transition:border-color .15s}
+.amount-big:focus{border-bottom-color:var(--blue)}
+.amount-hint{font-size:10px;color:var(--muted);text-align:center;margin-bottom:12px;font-family:var(--mono)}
+.quick-amounts{display:flex;gap:5px;margin-bottom:12px}
+.qa{flex:1;padding:7px;background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;font-family:var(--mono);font-size:11px;color:var(--text);cursor:pointer;transition:all .12s}
+.qa:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+.contacts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.contact-pick{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 4px;border-radius:9px;border:1.5px solid transparent;transition:all .15s}
+.contact-pick.selected{border-color:var(--blue);background:var(--blue-bg)}
+.cp-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.cp-name{font-size:10px;color:var(--text);text-align:center}
+.primary-btn{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.primary-btn:hover{background:var(--blue2)}
+.primary-btn:disabled{opacity:.3;cursor:not-allowed}
+.ghost-btn{width:100%;padding:10px;background:transparent;color:var(--muted);border:0.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer}
+.ghost-btn:hover{color:var(--text)}
+.steps{display:flex;gap:5px;justify-content:center;margin-bottom:16px}
+.step-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);transition:all .2s}
+.step-dot.active{background:var(--blue);width:16px;border-radius:3px}
+
+/* SUCCESS */
+.success-wrap{display:flex;flex-direction:column;align-items:center;padding:18px 0 12px}
+.success-ring{width:64px;height:64px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:12px;animation:popIn .3s ease}
+@keyframes popIn{0%{transform:scale(0)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.txn-summary{width:100%;background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.txn-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.txn-row .key{color:var(--muted)}
+.txn-row .val{font-family:var(--mono);font-weight:500}
+.explorer-link{font-size:10px;color:var(--blue);text-decoration:none;font-family:var(--mono);display:block;text-align:center;margin-bottom:12px;word-break:break-all}
+
+/* CONNECT WALL */
+.connect-wall{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 24px;text-align:center}
+.connect-icon{width:68px;height:68px;border-radius:20px;background:var(--blue-bg);border:0.5px solid var(--blue-border);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.connect-icon svg{width:30px;height:30px}
+.connect-wall h2{font-size:20px;font-weight:900;margin-bottom:8px;letter-spacing:-.5px}
+.connect-wall p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:22px}
+.connect-wall-btn{padding:13px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s}
+.connect-wall-btn:hover{background:var(--blue2)}
+
+/* STATUS BANNER */
+.status-banner{margin:0 14px 10px;padding:10px 12px;border-radius:var(--r);font-size:11px;display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+.status-banner.info{background:var(--blue-bg);border:0.5px solid var(--blue-border);color:var(--blue)}
+.status-banner.success{background:var(--green-bg);border:0.5px solid rgba(22,163,74,0.25);color:var(--green)}
+.status-banner.error{background:var(--red-bg);border:0.5px solid rgba(220,38,38,0.2);color:var(--red)}
+.status-banner.warning{background:var(--amber-bg);border:0.5px solid rgba(217,119,6,0.2);color:var(--amber)}
+
+/* SPINNER */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.spinner-blue{border-color:var(--blue-bg);border-top-color:var(--blue)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* APPROVE BANNER */
+.approve-banner{background:var(--amber-bg);border:0.5px solid rgba(217,119,6,0.22);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--amber);display:flex;align-items:flex-start;gap:8px}
+
+/* WALLET INFO */
+.wallet-info{margin:0 14px 10px;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between}
+.wallet-addr{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.wallet-net{font-family:var(--mono);font-size:10px;color:var(--green);background:var(--green-bg);padding:2px 7px;border-radius:10px}
+.wallet-net.wrong{color:var(--red);background:var(--red-bg)}
+
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="app">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+      <div class="logo-text">Travel<span>Pay</span></div>
+    </div>
+    <div class="header-right">
+      <div class="net-badge"><div class="net-dot" id="netDot"></div><span id="netLabel">Arc</span></div>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="connect-btn" id="connectBtn" onclick="handleConnect()">Connect</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="homeP">
+    <div id="connectWall" class="connect-wall" style="display:none">
+      <div class="connect-icon"><svg viewBox="0 0 30 30" fill="none"><path d="M15 3L27 8.5V21.5L15 27L3 21.5V8.5L15 3Z" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/><circle cx="15" cy="15" r="4" stroke="#2563EB" stroke-width="1.5"/></svg></div>
+      <h2>Pay anyone,<br>anywhere</h2>
+      <p>Connect your MetaMask wallet to send USDC instantly across borders on Arc Network.</p>
+      <button class="connect-wall-btn" onclick="handleConnect()">Connect MetaMask ↗</button>
+    </div>
+    <div id="homeContent">
+      <div class="balance-section">
+        <div class="balance-label">USDC BALANCE</div>
+        <div class="balance-amount" id="balAmt">—<span></span></div>
+        <div class="balance-sub" id="balAddr">Connecting to Arc Testnet...</div>
+        <div class="balance-row">
+          <div class="balance-change" id="balChange">Arc Testnet</div>
+          <div class="balance-usdc-badge">Chain 5042002</div>
+        </div>
+      </div>
+
+      <div id="wrongNetBanner" style="display:none" class="status-banner error">
+        ⚠️ Wrong network. Please switch to Arc Testnet (Chain ID: 5042002)
+        <button onclick="switchToArc()" style="margin-left:auto;background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:var(--mono);white-space:nowrap">Switch</button>
+      </div>
+
+      <div id="walletInfoBar" style="display:none" class="wallet-info">
+        <div class="wallet-addr" id="walletAddrShort">—</div>
+        <div class="wallet-net" id="walletNetLabel">Arc Testnet</div>
+      </div>
+
+      <div class="actions">
+        <div class="action" onclick="openModal('send')">
+          <div class="action-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="action-label">Send</div>
+        </div>
+        <div class="action" onclick="showNav(3)">
+          <div class="action-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#2563EB" stroke-width="1.8"/><path d="M7 7h4v4H7zM13 7h4v4h-4zM7 13h4v4H7zM15 13v4M13 15h4" stroke="#2563EB" stroke-width="1.5"/></svg></div>
+          <div class="action-label">Receive</div>
+        </div>
+        <div class="action" onclick="openModal('request')">
+          <div class="action-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7 7 7-7" stroke="#6B7FA8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="action-label">Request</div>
+        </div>
+        <div class="action" onclick="showNav(2)">
+          <div class="action-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#6B7FA8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="action-label">Groups</div>
+        </div>
+      </div>
+
+      <div class="fx-strip">
+        <div class="fx-title">LIVE USDC RATES <div class="fx-live-dot"></div></div>
+        <div class="fx-scroll" id="fxScroll"></div>
+        <div class="fx-converter">
+          <div class="fx-row">
+            <div class="fx-input-wrap"><span class="fx-cur" id="fxCurLabel">VND</span><input class="fx-input" id="fxInput" type="number" placeholder="850000" oninput="calcFX()"/></div>
+            <div class="fx-eq">=</div>
+            <div class="fx-input-wrap" style="max-width:110px"><span class="fx-cur">USDC</span><div class="fx-result" id="fxResult">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">RECENT</div>
+        <div class="see-all" onclick="showNav(1)">See all</div>
+      </div>
+      <div class="txn-list" id="txnList"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="historyP">
+    <div style="padding:14px 14px 8px;display:flex;gap:6px">
+      <input style="flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-family:var(--font);font-size:12px;color:var(--text);outline:none" id="searchInput" placeholder="Search transactions..." oninput="filterHistory(this.value)"/>
+    </div>
+    <div style="padding:0 14px 9px;display:flex;gap:5px">
+      <button class="qa filter-btn" style="flex:none;padding:6px 12px;border-radius:20px;border:0.5px solid var(--blue-border);color:var(--blue);background:var(--blue-bg)" onclick="filterType('all',this)">All</button>
+      <button class="qa filter-btn" style="flex:none;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border)" onclick="filterType('inc',this)">Received</button>
+      <button class="qa filter-btn" style="flex:none;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border)" onclick="filterType('out',this)">Sent</button>
+    </div>
+    <div class="txn-list" id="historyList"></div>
+  </div>
+
+  <!-- GROUPS -->
+  <div class="page" id="groupP">
+    <div style="padding:14px 14px 12px">
+      <div style="font-size:19px;font-weight:900;margin-bottom:2px">Group Trips</div>
+      <div style="font-size:11px;color:var(--muted)">On-chain expense splitting</div>
+    </div>
+    <div id="groupList"></div>
+    <button class="new-group-btn" onclick="openModal('newgroup')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Create new trip
+    </button>
+    <div style="padding:0 14px;margin-bottom:18px">
+      <div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r2);padding:16px">
+        <div style="font-size:10px;font-weight:700;margin-bottom:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">This Month</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <div><div style="font-size:20px;font-weight:900;color:var(--blue)">$245</div><div style="font-size:10px;color:var(--muted)">Group spending</div></div>
+          <div><div style="font-size:20px;font-weight:900">3</div><div style="font-size:10px;color:var(--muted)">Trips</div></div>
+          <div><div style="font-size:20px;font-weight:900;color:var(--blue)">$82</div><div style="font-size:10px;color:var(--muted)">You paid</div></div>
+          <div><div style="font-size:20px;font-weight:900">12</div><div style="font-size:10px;color:var(--muted)">Transactions</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR / RECEIVE -->
+  <div class="page" id="qrP">
+    <div class="qr-section">
+      <div style="width:100%;font-size:19px;font-weight:900;margin-bottom:16px">Receive Money</div>
+      <div class="qr-box">
+        <div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div>
+        <div class="qr-inner" id="qrGrid"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:4px">Your Wallet Address</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;text-align:center">Request USDC from anyone on Arc Network</div>
+      <div class="addr-box">
+        <div class="addr-text" id="qrAddr">Connect wallet to see address</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyAddr()">Copy</button>
+      </div>
+      <div class="req-amount-row">
+        <input class="req-input" type="number" id="reqAmt" placeholder="0.00 USDC"/>
+        <button style="padding:9px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap" onclick="genQR()">Generate QR</button>
+      </div>
+      <button class="share-btn" onclick="shareAddr()">Share Wallet Address</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-item active" onclick="showNav(0)" id="nav0">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" onclick="showNav(1)" id="nav1">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      <div class="nav-label">History</div>
+    </div>
+    <div class="nav-item" onclick="showNav(2)" id="nav2">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="nav-label">Groups</div>
+    </div>
+    <div class="nav-item" onclick="showNav(3)" id="nav3">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h4v4H7zM13 7h4v4h-4zM7 13h4v4H7zM15 13v4M13 15h4" stroke="currentColor" stroke-width="1.5"/></svg></div>
+      <div class="nav-label">Receive</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModalOutside(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ethers.js v5 CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG — Arc Network Testnet
+// ═══════════════════════════════════════════════
+const ARC_CHAIN_ID = 5042002;
+const ARC_CHAIN_HEX = '0x' + ARC_CHAIN_ID.toString(16);
+const ARC_RPC = 'https://rpc.testnet.arc.network';
+const ARC_EXPLORER = 'https://testnet.arcscan.app';
+
+const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+const P2P_ADDRESS  = '0xb6FF38eceCA9a2D014a82640f788DA580C869A43';
+const TRAVEL_ADDRESS = '0x7D21eAdA26C270FdB1104dBFfCD85775DCDaaE4E';
+
+// ── ABIs (reconstructed from README + standard ERC20) ──
+const USDC_ABI = [
+  'function balanceOf(address) view returns (uint256)',
+  'function decimals() view returns (uint8)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)'
+];
+
+const P2P_ABI = [
+  'function sendPayment(address recipient, uint256 amount, string note, string currency) returns (bool)',
+  'event PaymentSent(address indexed from, address indexed to, uint256 amount, string note, string currency)'
+];
+
+const TRAVEL_ABI = [
+  'function sendPayment(address recipient, uint256 amount, string note, string currency) returns (bool)',
+  'function createGroup(string name, string destination, address[] members, uint256 startDate, uint256 endDate) returns (uint256)',
+  'function addExpense(uint256 groupId, uint256 amount, string description, string currency, uint256 fxRate, address[] participants, uint256[] shares) returns (uint256)',
+  'function settleExpense(uint256 groupId, uint256 expenseId) returns (bool)',
+  'function payMerchant(address merchant, uint256 amount, string currency, uint256 fxRate) returns (bool)',
+  'function getUSDCAmount(string currency, uint256 amount) view returns (uint256)',
+  'event PaymentSent(address indexed from, address indexed to, uint256 amount, string note)',
+  'event GroupCreated(uint256 indexed groupId, string name, address indexed creator)',
+  'event ExpenseAdded(uint256 indexed groupId, uint256 indexed expenseId, uint256 amount)'
+];
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let wallet = {
+  connected: false,
+  address: null,
+  provider: null,
+  signer: null,
+  usdcBalance: null,
+  chainId: null,
+};
+
+let dark = false;
+
+const CONTACTS = [
+  {id:1,name:'Sarah Johnson',init:'SJ',color:'#2563EB',arc:'0x3A1f...B2c9'},
+  {id:2,name:'James Carter',init:'JC',color:'#F59E0B',arc:'0x7B2c...D4e1'},
+  {id:3,name:'Emma Wilson',init:'EW',color:'#7C3AED',arc:'0x9D4e...A3f7'},
+  {id:4,name:'Lucas Martin',init:'LM',color:'#EC4899',arc:'0x2F8a...C5b2'},
+  {id:5,name:'Noah Bennett',init:'NB',color:'#0EA5E9',arc:'0x5C3b...E9d4'},
+  {id:6,name:'Olivia Chen',init:'OC',color:'#10B981',arc:'0x8E1d...F6a3'},
+];
+
+const DEMO_TXNS = [
+  {id:1,c:CONTACTS[0],amt:-25,note:'Dinner in Hanoi Old Quarter',time:'10 min ago',type:'out',onchain:false},
+  {id:2,c:CONTACTS[2],amt:50,note:'Fuel reimbursement',time:'1 hour ago',type:'inc',onchain:false},
+  {id:3,c:CONTACTS[3],amt:-12,note:'Morning coffee',time:'3 hours ago',type:'out',onchain:false},
+  {id:4,c:CONTACTS[1],amt:150,note:'Sapa tour payment',time:'Yesterday',type:'inc',onchain:false},
+];
+
+let state = {
+  txns: [...DEMO_TXNS],
+  selFX: null,
+  sendContact: null,
+  sendAmt: '',
+  sendStep: 0,
+  modal: null,
+  successData: null,
+  pendingTxHash: null,
+};
+
+const FX = [
+  {code:'VND',flag:'🇻🇳',rate:0.000039},
+  {code:'EUR',flag:'🇪🇺',rate:1.08},
+  {code:'JPY',flag:'🇯🇵',rate:0.0065},
+  {code:'THB',flag:'🇹🇭',rate:0.028},
+  {code:'SGD',flag:'🇸🇬',rate:0.74},
+  {code:'KRW',flag:'🇰🇷',rate:0.00072},
+  {code:'AUD',flag:'🇦🇺',rate:0.65},
+  {code:'GBP',flag:'🇬🇧',rate:1.26},
+];
+state.selFX = FX[0];
+
+const GROUPS = [
+  {dest:'🇮🇩 Bali, Indonesia',members:6,spent:820,budget:1200,days:'1–8 Mar',status:'active'},
+  {dest:'🇻🇳 Hoi An, Vietnam',members:4,spent:245,budget:500,days:'12–18 Apr',status:'done'},
+  {dest:'🇯🇵 Tokyo, Japan',members:3,spent:0,budget:1200,days:'25 Dec–2 Jan',status:'upcoming'},
+];
+
+// ═══════════════════════════════════════════════
+// WALLET CONNECTION
+// ═══════════════════════════════════════════════
+async function handleConnect() {
+  if (wallet.connected) {
+    disconnectWallet();
+    return;
+  }
+  if (!window.ethereum) {
+    showBanner('MetaMask not detected. Please install MetaMask.', 'error');
+    return;
+  }
+  try {
+    document.getElementById('connectBtn').textContent = 'Connecting...';
+    document.getElementById('connectBtn').classList.add('loading');
+
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await setupWallet(accounts[0]);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('connectBtn').textContent = 'Connect';
+    document.getElementById('connectBtn').classList.remove('loading');
+    showBanner('Connection cancelled.', 'warning');
+  }
+}
+
+async function setupWallet(address) {
+  wallet.provider = new ethers.providers.Web3Provider(window.ethereum);
+  wallet.signer = wallet.provider.getSigner();
+  wallet.address = address;
+  wallet.chainId = (await wallet.provider.getNetwork()).chainId;
+  wallet.connected = true;
+
+  updateWalletUI();
+  await fetchUSDCBalance();
+
+  // Listen for account/network changes
+  window.ethereum.on('accountsChanged', accounts => {
+    if (accounts.length === 0) disconnectWallet();
+    else { wallet.address = accounts[0]; updateWalletUI(); fetchUSDCBalance(); }
+  });
+  window.ethereum.on('chainChanged', () => window.location.reload());
+}
+
+function disconnectWallet() {
+  wallet = { connected: false, address: null, provider: null, signer: null, usdcBalance: null, chainId: null };
+  const btn = document.getElementById('connectBtn');
+  btn.textContent = 'Connect';
+  btn.classList.remove('connected', 'loading');
+  document.getElementById('connectWall').style.display = '';
+  document.getElementById('homeContent').style.display = 'none';
+  document.getElementById('walletInfoBar').style.display = 'none';
+  document.getElementById('wrongNetBanner').style.display = 'none';
+  document.getElementById('netDot').classList.add('disconnected');
+  document.getElementById('netLabel').textContent = 'Arc';
+}
+
+function updateWalletUI() {
+  const btn = document.getElementById('connectBtn');
+  const short = wallet.address.slice(0,6) + '...' + wallet.address.slice(-4);
+  btn.textContent = short;
+  btn.classList.add('connected');
+  btn.classList.remove('loading');
+
+  document.getElementById('connectWall').style.display = 'none';
+  document.getElementById('homeContent').style.display = '';
+  document.getElementById('walletInfoBar').style.display = 'flex';
+  document.getElementById('walletAddrShort').textContent = short;
+  document.getElementById('qrAddr').textContent = wallet.address;
+
+  const isArc = wallet.chainId === ARC_CHAIN_ID;
+  document.getElementById('wrongNetBanner').style.display = isArc ? 'none' : 'flex';
+  document.getElementById('walletNetLabel').textContent = isArc ? 'Arc Testnet ✓' : 'Wrong Network';
+  document.getElementById('walletNetLabel').className = 'wallet-net' + (isArc ? '' : ' wrong');
+  document.getElementById('netDot').classList.toggle('disconnected', !isArc);
+  document.getElementById('netLabel').textContent = isArc ? 'Arc' : '!';
+
+  document.getElementById('balAddr').textContent = short + ' · Arc Testnet';
+}
+
+async function fetchUSDCBalance() {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(ARC_RPC);
+    const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+    const [raw, decimals] = await Promise.all([
+      usdc.balanceOf(wallet.address),
+      usdc.decimals()
+    ]);
+    const balance = parseFloat(ethers.utils.formatUnits(raw, decimals));
+    wallet.usdcBalance = balance;
+    const parts = balance.toFixed(2).split('.');
+    document.getElementById('balAmt').innerHTML = parts[0] + '<span>.' + parts[1] + '</span>';
+    document.getElementById('balChange').textContent = '✓ USDC on Arc';
+  } catch (e) {
+    console.error('Balance fetch failed:', e);
+    document.getElementById('balAmt').innerHTML = '—<span></span>';
+  }
+}
+
+async function switchToArc() {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: ARC_CHAIN_HEX }]
+    });
+  } catch (e) {
+    if (e.code === 4902) {
+      // Chain not added yet — add it
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: ARC_CHAIN_HEX,
+          chainName: 'Arc Network Testnet',
+          nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 6 },
+          rpcUrls: [ARC_RPC],
+          blockExplorerUrls: [ARC_EXPLORER]
+        }]
+      });
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SEND PAYMENT (ArcP2PPayments contract)
+// ═══════════════════════════════════════════════
+async function executeSend(recipientAddress, amountUSDC, note, currency) {
+  if (!wallet.connected || !wallet.signer) throw new Error('Wallet not connected');
+  if (wallet.chainId !== ARC_CHAIN_ID) throw new Error('Wrong network');
+
+  const amountWei = ethers.utils.parseUnits(amountUSDC.toString(), 6); // USDC = 6 decimals
+
+  // Step 1: Approve USDC spend
+  showBanner('Step 1/2: Approving USDC...', 'info');
+  const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, wallet.signer);
+
+  // Check current allowance
+  const allowance = await usdc.allowance(wallet.address, P2P_ADDRESS);
+  if (allowance.lt(amountWei)) {
+    const approveTx = await usdc.approve(P2P_ADDRESS, amountWei);
+    await approveTx.wait();
+  }
+
+  // Step 2: Send via P2P contract
+  showBanner('Step 2/2: Sending payment...', 'info');
+  const p2p = new ethers.Contract(P2P_ADDRESS, P2P_ABI, wallet.signer);
+  const tx = await p2p.sendPayment(recipientAddress, amountWei, note, currency);
+  state.pendingTxHash = tx.hash;
+
+  showBanner('Waiting for confirmation...', 'info');
+  const receipt = await tx.wait();
+
+  return receipt;
+}
+
+// ═══════════════════════════════════════════════
+// SEND MODAL FLOW
+// ═══════════════════════════════════════════════
+function openModal(tp) {
+  state.modal = tp; state.sendStep = 0; state.sendContact = null; state.sendAmt = '';
+  document.getElementById('modalOverlay').style.display = 'flex';
+  renderModal();
+}
+function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; state.modal = null; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+function renderModal() {
+  const mc = document.getElementById('modalContent');
+  if (state.modal === 'send') mc.innerHTML = renderSend();
+  else if (state.modal === 'request') mc.innerHTML = renderReq();
+  else if (state.modal === 'newgroup') mc.innerHTML = renderNewGroup();
+  else if (state.modal === 'success') mc.innerHTML = renderSuccess();
+  else if (state.modal === 'sending') mc.innerHTML = renderSending();
+}
+
+function cGrid() {
+  return CONTACTS.map(c => `
+    <div class="contact-pick ${state.sendContact?.id === c.id ? 'selected' : ''}" onclick="selC(${c.id})">
+      <div class="cp-av" style="background:${c.color}20;color:${c.color}">${c.init}</div>
+      <div class="cp-name">${c.name.split(' ')[0]}</div>
+    </div>`).join('');
+}
+
+function renderSend() {
+  const s = state.sendStep;
+  const isReal = wallet.connected && wallet.chainId === ARC_CHAIN_ID;
+
+  return `<div class="steps">${[0,1,2].map(i=>`<div class="step-dot ${i===s?'active':''}"></div>`).join('')}</div>
+  <div class="modal-title">${s===0?'Send Money':s===1?'Enter Amount':'Review & Send'}</div>
+  ${s===0?`
+    <div style="margin-bottom:9px;font-size:11px;color:var(--muted)">Select recipient</div>
+    <div style="background:var(--input-bg);border:0.5px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Or enter wallet address</div>
+      <input id="customAddr" class="field-input" style="background:transparent;border:none;padding:0;font-size:12px" placeholder="0x..."/>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:7px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Quick select</div>
+    <div class="contacts-grid">${cGrid()}</div>
+    <button class="primary-btn" onclick="nxt()" ${!state.sendContact?'disabled':''}>Continue</button>
+    <button class="ghost-btn" onclick="closeModal()">Cancel</button>
+  `:''}
+  ${s===1?`
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;background:var(--bg3);border-radius:var(--r);margin-bottom:12px;border:0.5px solid var(--border)">
+      <div class="cp-av" style="background:${state.sendContact.color}20;color:${state.sendContact.color};width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">${state.sendContact.init}</div>
+      <div><div style="font-size:12px;font-weight:700">${state.sendContact.name}</div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">${state.sendContact.arc}</div></div>
+    </div>
+    <input class="amount-big" type="number" placeholder="0.00" value="${state.sendAmt}" id="amtInput"
+      oninput="state.sendAmt=this.value;document.querySelector('.primary-btn').disabled=!this.value||parseFloat(this.value)<=0" autofocus/>
+    <div class="amount-hint">USDC · Balance: $${wallet.usdcBalance !== null ? wallet.usdcBalance.toFixed(2) : '—'}</div>
+    <div class="quick-amounts">${[5,10,20,50].map(a=>`<button class="qa" onclick="setA(${a})">$${a}</button>`).join('')}</div>
+    <div class="field"><div class="field-label">Note</div><input class="field-input" id="noteInput" placeholder="e.g. Hotel split, Bali..."/></div>
+    <button class="primary-btn" onclick="nxt()" ${!state.sendAmt||parseFloat(state.sendAmt)<=0?'disabled':''}>Review →</button>
+    <button class="ghost-btn" onclick="prv()">Back</button>
+  `:''}
+  ${s===2?`
+    <div style="background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div class="txn-row"><span class="key">Recipient</span><span class="val">${state.sendContact.name}</span></div>
+      <div class="txn-row"><span class="key">Wallet</span><span class="val" style="font-size:9px">${state.sendContact.arc}</span></div>
+      <div class="txn-row"><span class="key">Amount</span><span class="val" style="color:var(--red)">-$${parseFloat(state.sendAmt).toFixed(2)} USDC</span></div>
+      <div class="txn-row"><span class="key">Note</span><span class="val" id="reviewNote">—</span></div>
+      <div class="txn-row" style="border-top:0.5px solid var(--border);padding-top:7px;margin-top:3px">
+        <span class="key">Network fee</span>
+        <span class="val" style="color:var(--green)">Free ✓</span>
+      </div>
+    </div>
+    ${isReal ? `
+      <div style="background:var(--blue-bg);border:0.5px solid var(--blue-border);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--blue)">
+        ⚡ This will send a real transaction on Arc Testnet via ArcP2PPayments contract.
+      </div>
+    ` : `
+      <div class="approve-banner">⚠️ Demo mode — Connect MetaMask on Arc Testnet for real transactions.</div>
+    `}
+    <button class="primary-btn" onclick="confirmSend()" id="confirmSendBtn">
+      ${isReal ? '⚡ Confirm & Send On-Chain' : 'Confirm (Demo)'}
+    </button>
+    <button class="ghost-btn" onclick="prv()">Back</button>
+  `:''}`;
+}
+
+function renderSending() {
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;padding:24px 0 12px;gap:16px;text-align:center">
+      <div style="width:60px;height:60px;border-radius:50%;border:3px solid var(--blue-bg);border-top-color:var(--blue);animation:spin .8s linear infinite"></div>
+      <div style="font-size:17px;font-weight:800">Sending on Arc Network</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">Your transaction is being confirmed.<br>Sub-second finality on Arc Network.</div>
+      ${state.pendingTxHash ? `
+        <a href="${ARC_EXPLORER}/tx/${state.pendingTxHash}" target="_blank"
+           style="font-size:10px;font-family:var(--mono);color:var(--blue);text-decoration:none;word-break:break-all">
+          ${state.pendingTxHash.slice(0,20)}... ↗
+        </a>
+      ` : ''}
+    </div>`;
+}
+
+function renderReq() {
+  return `<div class="modal-title">Request Payment</div>
+    <div class="contacts-grid">${cGrid().split('</div>').slice(0,4).join('</div>')+'</div>'}</div>
+    <div class="field"><div class="field-label">Amount</div><input class="field-input" type="number" placeholder="0.00 USDC" id="reqAmtModal"/></div>
+    <div class="field"><div class="field-label">Reason</div><input class="field-input" placeholder="e.g. Lunch in Bali..." id="reqNote"/></div>
+    <button class="primary-btn" onclick="closeModal()">Send Request</button>
+    <button class="ghost-btn" onclick="closeModal()">Cancel</button>`;
+}
+
+function renderNewGroup() {
+  return `<div class="modal-title">Create New Trip</div>
+    <div class="field"><div class="field-label">Trip Name</div><input class="field-input" placeholder="e.g. Bali June 2026..." id="newTripName"/></div>
+    <div class="field"><div class="field-label">Destination</div><input class="field-input" placeholder="e.g. Bali, Indonesia" id="newTripDest"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
+      <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Departure</div><input class="field-input" type="date" id="newTripStart"/></div>
+      <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Return</div><input class="field-input" type="date" id="newTripEnd"/></div>
+    </div>
+    <div class="field"><div class="field-label">Members</div>
+    <div class="contacts-grid" style="grid-template-columns:repeat(6,1fr)">${CONTACTS.map(c=>`
+      <div class="contact-pick" onclick="this.classList.toggle('selected')" id="mem_${c.id}">
+        <div class="cp-av" style="background:${c.color}20;color:${c.color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">${c.init}</div>
+      </div>`).join('')}</div></div>
+    ${wallet.connected && wallet.chainId === ARC_CHAIN_ID ? `
+      <div style="background:var(--blue-bg);border:0.5px solid var(--blue-border);border-radius:var(--r);padding:9px 11px;margin-bottom:11px;font-size:10px;color:var(--blue)">
+        ⚡ Group will be created on-chain via TravelPay contract.
+      </div>
+    ` : ''}
+    <button class="primary-btn" onclick="confirmCreateGroup()">Create Trip</button>
+    <button class="ghost-btn" onclick="closeModal()">Cancel</button>`;
+}
+
+function renderSuccess() {
+  const d = state.successData;
+  const explorerUrl = d.txHash ? `${ARC_EXPLORER}/tx/${d.txHash}` : `${ARC_EXPLORER}/address/${TRAVEL_ADDRESS}`;
+  return `
+  <div class="success-wrap">
+    <div class="success-ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div style="font-size:17px;font-weight:800;margin-bottom:4px">${d.onchain ? '⚡ On-Chain Success!' : 'Transfer Recorded'}</div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px">
+      Sent <strong style="font-family:var(--mono)">$${d.amt.toFixed(2)} USDC</strong> to ${d.contact.name}
+    </div>
+  </div>
+  <div class="txn-summary">
+    <div class="txn-row"><span class="key">Recipient</span><span class="val">${d.contact.name}</span></div>
+    <div class="txn-row"><span class="key">Amount</span><span class="val">$${d.amt.toFixed(2)} USDC</span></div>
+    <div class="txn-row"><span class="key">Network</span><span class="val">Arc Testnet</span></div>
+    <div class="txn-row"><span class="key">Fee</span><span class="val" style="color:var(--green)">$0.00 ✓</span></div>
+    ${d.txHash ? `<div class="txn-row"><span class="key">Tx Hash</span><span class="val" style="font-size:9px">${d.txHash.slice(0,18)}...</span></div>` : 
+    `<div class="txn-row"><span class="key">Tx ID</span><span class="val">TXN-${Math.random().toString(36).slice(2,8).toUpperCase()}</span></div>`}
+  </div>
+  <a class="explorer-link" href="${explorerUrl}" target="_blank">View on Arc Explorer ↗</a>
+  <button class="primary-btn" onclick="closeModal();showNav(0)">Back to Home</button>`;
+}
+
+// ═══════════════════════════════════════════════
+// SEND FLOW HELPERS
+// ═══════════════════════════════════════════════
+function selC(id) { state.sendContact = CONTACTS.find(c => c.id === id); renderModal(); }
+function nxt() {
+  // Handle custom address input on step 0
+  if (state.sendStep === 0) {
+    const custom = document.getElementById('customAddr')?.value?.trim();
+    if (custom && ethers.utils.isAddress(custom) && !state.sendContact) {
+      state.sendContact = {id:99,name: custom.slice(0,6)+'...'+custom.slice(-4), init:'?', color:'#6B7FA8', arc: custom};
+    }
+  }
+  state.sendStep++;
+  renderModal();
+  if (state.sendStep === 1) setTimeout(() => { const f = document.getElementById('amtInput'); if (f) f.focus(); }, 50);
+  if (state.sendStep === 2) {
+    setTimeout(() => {
+      const noteEl = document.getElementById('reviewNote');
+      const noteInput = document.getElementById('noteInput');
+      if (noteEl && noteInput) noteEl.textContent = noteInput.value || '—';
+    }, 10);
+  }
+}
+function prv() { state.sendStep--; renderModal(); }
+function setA(a) {
+  state.sendAmt = String(a); renderModal();
+  setTimeout(() => { const f = document.getElementById('amtInput'); if (f) { f.value = a; f.dispatchEvent(new Event('input')); } }, 10);
+}
+
+async function confirmSend() {
+  const amt = parseFloat(state.sendAmt);
+  const noteEl = document.getElementById('noteInput');
+  const note = noteEl ? noteEl.value : '';
+
+  if (wallet.connected && wallet.chainId === ARC_CHAIN_ID) {
+    // REAL on-chain transaction
+    try {
+      state.modal = 'sending';
+      state.pendingTxHash = null;
+      renderModal();
+
+      const receipt = await executeSend(state.sendContact.arc, amt, note, 'USD');
+
+      // Success
+      state.successData = {
+        contact: state.sendContact,
+        amt,
+        onchain: true,
+        txHash: receipt.transactionHash
+      };
+
+      // Add to local txn list
+      state.txns.unshift({
+        id: Date.now(),
+        c: state.sendContact,
+        amt: -amt,
+        note: note || 'USDC Transfer',
+        time: 'Just now',
+        type: 'out',
+        onchain: true,
+        txHash: receipt.transactionHash
+      });
+
+      // Refresh balance
+      await fetchUSDCBalance();
+      renderTxns(); renderHistory();
+
+      state.modal = 'success';
+      renderModal();
+    } catch (e) {
+      console.error(e);
+      closeModal();
+      const msg = e.message?.includes('user rejected') ? 'Transaction rejected.' :
+                  e.message?.includes('Wrong network') ? 'Wrong network. Switch to Arc Testnet.' :
+                  'Transaction failed: ' + (e.reason || e.message || 'Unknown error');
+      showBanner(msg, 'error');
+    }
+  } else {
+    // DEMO mode
+    state.successData = { contact: state.sendContact, amt, onchain: false, txHash: null };
+    state.txns.unshift({ id: Date.now(), c: state.sendContact, amt: -amt, note: note || 'Transfer', time: 'Just now', type: 'out', onchain: false });
+    renderTxns(); renderHistory();
+    state.modal = 'success';
+    renderModal();
+  }
+}
+
+async function confirmCreateGroup() {
+  const name = document.getElementById('newTripName')?.value;
+  const dest = document.getElementById('newTripDest')?.value;
+  if (!name || !dest) { showBanner('Please fill in trip name and destination.', 'warning'); return; }
+
+  if (wallet.connected && wallet.chainId === ARC_CHAIN_ID) {
+    try {
+      closeModal();
+      showBanner('Creating group on Arc Network...', 'info');
+      const travel = new ethers.Contract(TRAVEL_ADDRESS, TRAVEL_ABI, wallet.signer);
+      const start = Math.floor(Date.now() / 1000);
+      const end = start + 14 * 86400;
+      const tx = await travel.createGroup(name, dest, [wallet.address], start, end);
+      await tx.wait();
+      showBanner('Group "' + name + '" created on-chain! ✓', 'success');
+    } catch (e) {
+      console.error(e);
+      showBanner('Group creation failed: ' + (e.reason || e.message), 'error');
+    }
+  } else {
+    closeModal();
+    showBanner('Demo: Group "' + name + '" created locally.', 'info');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+function showBanner(msg, type = 'info') {
+  const existing = document.getElementById('statusBanner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'statusBanner';
+  banner.className = `status-banner ${type}`;
+  banner.innerHTML = msg;
+  const target = document.getElementById('txnList');
+  target?.parentElement?.insertBefore(banner, target);
+  setTimeout(() => banner.remove(), 5000);
+}
+
+function txnHTML(x) {
+  return `<div class="txn-item ${x.onchain ? 'onchain' : ''}" ${x.txHash ? `onclick="window.open('${ARC_EXPLORER}/tx/${x.txHash}','_blank')"` : ''}>
+    <div class="txn-av" style="background:${x.c.color}20;color:${x.c.color}">${x.c.init}</div>
+    <div class="txn-info">
+      <div class="txn-name">${x.c.name}${x.onchain ? '<span class="txn-chain-badge">on-chain</span>' : ''}</div>
+      <div class="txn-note">${x.note}</div>
+    </div>
+    <div class="txn-right">
+      <div class="txn-amount ${x.type}">${x.type==='out'?'-':'+'}$${Math.abs(x.amt).toFixed(2)}</div>
+      <div class="txn-time">${x.time}</div>
+    </div>
+  </div>`;
+}
+
+function renderTxns() { document.getElementById('txnList').innerHTML = state.txns.slice(0,4).map(txnHTML).join(''); }
+function renderHistory() { document.getElementById('historyList').innerHTML = state.txns.map(txnHTML).join(''); }
+function filterHistory(q) {
+  const f = state.txns.filter(x => x.c.name.toLowerCase().includes(q.toLowerCase()) || x.note.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('historyList').innerHTML = f.length ? f.map(txnHTML).join('') : '<div style="text-align:center;padding:28px;color:var(--muted);font-size:12px">No transactions found</div>';
+}
+function filterType(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => { b.style.borderColor='var(--border)'; b.style.color=''; b.style.background=''; });
+  btn.style.cssText += 'border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)';
+  document.getElementById('historyList').innerHTML = (type==='all' ? state.txns : state.txns.filter(x=>x.type===type)).map(txnHTML).join('');
+}
+function renderGroups() {
+  document.getElementById('groupList').innerHTML = GROUPS.map(g => `
+    <div class="group-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-size:13px;font-weight:700">${g.dest}</div>
+        <div class="group-status ${g.status==='active'?'active':''}">${g.status==='active'?'Active':g.status==='done'?'Completed':'Upcoming'}</div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:10px;color:var(--muted)"><span>👥 ${g.members}</span><span>💰 $${g.spent}/$${g.budget}</span><span>📅 ${g.days}</span></div>
+      <div class="group-bar"><div class="group-bar-fill" style="width:${Math.round(g.spent/g.budget*100)}%"></div></div>
+    </div>`).join('');
+}
+
+const QP=[1,0,1,1,0,1,0,1,0,0,0,1,1,0,1,0,1,0,0,1,1,0,1,1,0,1,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,1,1,0,0,1,1,0,1,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0,1,0,0,1,1,0,1,0,0,1,1,0,1,0,1,0,0,1,1,0,0,1];
+function renderQR() { document.getElementById('qrGrid').innerHTML = QP.map(b=>`<div class="qr-cell" style="background:${b?'var(--text)':'transparent'}"></div>`).join(''); }
+function renderFX() {
+  document.getElementById('fxScroll').innerHTML = FX.map((f,i) => `
+    <div class="fx-chip ${i===0?'active':''}" onclick="selFX(${i})" id="fxc${i}">
+      <div class="fx-flag">${f.flag}</div>
+      <div class="fx-code">${f.code}</div>
+      <div class="fx-rate">$${f.rate<0.01?f.rate.toFixed(6):f.rate.toFixed(4)}</div>
+    </div>`).join('');
+}
+function selFX(i) {
+  document.querySelectorAll('.fx-chip').forEach((c,j) => c.classList.toggle('active', i===j));
+  state.selFX = FX[i];
+  document.getElementById('fxCurLabel').textContent = FX[i].code;
+  calcFX();
+}
+function calcFX() {
+  const v = parseFloat(document.getElementById('fxInput').value) || 0;
+  document.getElementById('fxResult').textContent = v > 0 ? '$' + (v * state.selFX.rate).toFixed(2) : '—';
+}
+function showNav(i) {
+  ['homeP','historyP','groupP','qrP'].forEach((p,j) => document.getElementById(p).classList.toggle('active', i===j));
+  ['nav0','nav1','nav2','nav3'].forEach((n,j) => document.getElementById(n).classList.toggle('active', i===j));
+}
+function toggleTheme() {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+}
+function copyAddr() {
+  const addr = wallet.address || '0xC44bfAEfCA7cCaF45c29826C69377BfF3c7CE826';
+  navigator.clipboard.writeText(addr).catch(()=>{});
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '✓'; btn.style.color = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+}
+function shareAddr() {
+  const addr = wallet.address || '0xC44bfAEfCA7cCaF45c29826C69377BfF3c7CE826';
+  if (navigator.share) navigator.share({ title:'TravelPay', text: addr }); else copyAddr();
+}
+function genQR() { alert('QR: $' + (document.getElementById('reqAmt').value || '0') + ' USDC'); }
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderFX(); renderTxns(); renderHistory(); renderGroups(); renderQR();
+
+// Auto-connect if MetaMask already authorized
+(async () => {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) await setupWallet(accounts[0]);
+      else {
+        document.getElementById('connectWall').style.display = '';
+        document.getElementById('homeContent').style.display = 'none';
+      }
+    } catch (e) {
+      document.getElementById('connectWall').style.display = '';
+      document.getElementById('homeContent').style.display = 'none';
+    }
+  } else {
+    document.getElementById('connectWall').style.display = '';
+    document.getElementById('homeContent').style.display = 'none';
+  }
+})();
+</script>
+</body>
+</html>
